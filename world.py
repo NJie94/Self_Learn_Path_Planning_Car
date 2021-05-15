@@ -4,16 +4,16 @@ import pygame as py
 class World:
     
     #Declare initial position
-    initialPos = (0,0)
+    initPos = (0,0)
     bestCarPos = (0,0)
     
     #initialise world map and car model position
-    def __init__(self,starting_pos, world_width,world_height):
-        self.initialPos = starting_pos
+    def __init__(self,startPos, world_width,world_height):
+        self.initPos = startPos
         self.bestCarPos = (0,0)
-        self.win = py.display.set_mode(world_width,world_height)
-        self.win_width = world_width
-        self.win_height = world_height
+        self.window = py.display.set_mode(world_width,world_height)
+        self.window_width = world_width
+        self.window_height = world_height
         self.score = 0
         self.bestGenome = None
         
@@ -21,8 +21,8 @@ class World:
         self.bestCarPos = pos
     
     def getScreenCoords(self,x,y):
-        return (int(x + self.initialPos[0] - self.bestCarPos[0]),
-                (y + self.initialPos[1] - self.bestCarPos[1]))
+        return (int(x + self.initPos[0] - self.bestCarPos[0]),
+                (y + self.initPos[1] - self.bestCarPos[1]))
         
     def getBestCarPos(self):
         return self.bestCarPos

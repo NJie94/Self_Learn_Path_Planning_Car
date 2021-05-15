@@ -1,15 +1,15 @@
 import sys
 import os
-import pygame as py
-import numpy as np
+import pygame as pygame
+import numpy as numpy
 from .config_variables import *
 from math import *
 from random import random
 from .road import *
-from .vect2d import vect2d
+from .vector2d import vector2d
 
 #******************************************* Function ************************************
-def getSensorEquations(self, world):       #returns the equations of the straight lines(in variable y) of the machine in order [vertical, increasing diagonal, horizontal, decreasing diagonal]
+def getSensor(self, world):       #returns the equations of the straight lines(in variable y) of the machine in order [vertical, increasing diagonal, horizontal, decreasing diagonal]
         eq = []
         for i in range(4):
             omega = radians(self.rot + 45*i)
@@ -17,22 +17,22 @@ def getSensorEquations(self, world):       #returns the equations of the straigh
             dy = - SENSOR_DISTANCE * cos(omega)
 
             if CAR_DBG:             #Draw Sensor Line
-                py.draw.lines(world.win, GREEN, False, [world.getScreenCoords(self.x+dx, self.y+dy), world.getScreenCoords(self.x-dx, self.y-dy)], 2)
+                pygame.draw.lines(world.win, GREEN, False, [world.getScreenCoords(self.x+dx, self.y+dy), world.getScreenCoords(self.x-dx, self.y-dy)], 2)
 
-            coef = getSegmentEquation(self, vect2d(x = self.x+dx, y = self.y+dy))
+            coef = getSEGEquation(self, vector2d(x = self.x+dx, y = self.y+dy))
             eq.append(coef)
         return eq
     
-def getSegmentEquation(p, q):          #equations in variable y between two points (taking into account the coordinate system with y inverted) in the general form ax + by + c = 0
+def getSEGEquation(g, h):          #equations in variable y between two points (taking into ACCELETATIONount the coordinate system with y inverted) in the general form ax + by + c = 0
 
-    a = p.y - q.y
-    b = q.x -p.x
-    c = p.x*q.y - q.x*p.y
+    a = g.y - h.y
+    b = h.x -g.x
+    c = g.x*h.y - h.x*g.y
 
     return (a,b,c)
 
-def getDistance(world, car, sensors, sensorsEquations, p, q):     #given the segment (m, q) I calculate the distance and put it in the corresponding sensor
-    (a2,b2,c2) = getSegmentEquation(p, q)
+def getDistance(world, car, sensors, sensorsEquations, g, h):     #given the segment (m, q) I calculate the distance and put it in the corresponding sensor
+    (a2,b2,c2) = getSEGEquation(g, h)
 
     for i,(a1,b1,c1) in enumerate(sensorsEquations):
         #get intersection between sensor and segment
@@ -42,10 +42,10 @@ def getDistance(world, car, sensors, sensorsEquations, p, q):     #given the seg
                 continue
             y = (a1*c2 - c1*a2)/d
             x = (c1*b2 - b1*c2)/d
-            if (y-p.y)*(y-q.y) > 0 or (x-p.x)*(x-q.x) > 0:        #if the intersection is not between a and b, go to the next iteration
+            if (y-g.y)*(y-h.y) > 0 or (x-g.x)*(x-h.x) > 0:        #if the intersection is not between a and b, go to the next iteration
                 continue
-        else:       #rette coincidenti
-            (x, y) = (abs(p.x-q.x), abs(p.y-q.y))
+        else:       #coincident lines
+            (x, y) = (abs(g.x-h.x), abs(g.y-h.y))
 
         #aquire distance
         dist = ((car.x - x)**2 + (car.y - y)**2)**0.5
@@ -61,15 +61,15 @@ def getDistance(world, car, sensors, sensorsEquations, p, q):     #given the seg
         if dist < sensors[index]:
             sensors[index] = dist
 
-def decodeCommand(commands, type):
+def decode(commands, type):
     if commands[type] > ACTIVATION_TRESHOLD:
-        if type == ACC and commands[type] > commands[BRAKE]:
+        if type == ACCELETATION and commands[type] > commands[BRAKE]:
             return True
-        elif type == BRAKE and commands[type] > commands[ACC]:
+        elif type == BRAKE and commands[type] > commands[ACCELETATION]:
             return True
-        elif type == TURN_LEFT and commands[type] > commands[TURN_RIGHT]:
+        elif type == TURNLEFT and commands[type] > commands[TURNRIGHT]:
             return True
-        elif type == TURN_RIGHT and commands[type] > commands[TURN_LEFT]:
+        elif type == TURNRIGHT and commands[type] > commands[TURNLEFT]:
             return True
     return False
 
@@ -80,10 +80,10 @@ class car:
     def __init__(self,x,y,turn):
         self.x = x
         self.y = y
-        self.rot = turn
-        self.rot = 0
-        self.vel = MAX_VEL/2
-        self.acc = 0
+        self.rotation = turn
+        self.rotation = 0
+        self.VELOCITY = MAX_VELOCITY/2
+        self.ACCELETATION = 0
         self.initImgs()
         self.commands = [0,0,0,0]
         
@@ -91,13 +91,13 @@ class car:
         img_names = ["yellow_car.png", "red_car.png", "blu_car.png", "green_car.png"]
         name = img_names[floor(random()*len(img_names))%len(img_names)]                 #Randomly Take one of this image
 
-        self.img = py.transform.rotate(py.transform.scale(py.image.load(os.path.join("imgs", name)).convert_alpha(), (120,69)), -90)
-        self.brake_img = py.transform.rotate(py.transform.scale(py.image.load(os.path.join("imgs", "brakes.png")).convert_alpha(), (120,69)), -90)
+        self.img = pygame.transform.rotate(pygame.transform.scale(pygame.image.load(os.path.join("imgs", name)).convert_alpha(), (120,69)), -90)
+        self.brake_img = pygame.transform.rotate(pygame.transform.scale(pygame.image.load(os.path.join("imgs", "brakes.png")).convert_alpha(), (120,69)), -90)
         
     #Detect collision of the car with the road model
     def detectCollision(self, road):
         #get mask
-        mask = py.mask.from_surface(self.img)
+        mask = pygame.mask.from_surface(self.img)
         (width, height) = mask.get_size()
         for v in [road.pointsLeft, road.pointsRight]:
             for p in v:
@@ -111,32 +111,72 @@ class car:
         return False
     
 
-    def getInputs(self, world, road):         #Draw the sensor when dbg is True
+    def getInputs(self, map, road):         #Draw the sensor when dbg is True
         sensors = []
-        for k in range(8):
+        for w in range(8):
             sensors.append(SENSOR_DISTANCE)
-        sensorsEquations = getSensorEquations(self, world)
+        sensorsEquations = getSensor(self, map)
 
         for v in [road.pointsLeft, road.pointsRight]:
             i = road.bottomPointIndex
             while v[i].y > self.y - SENSOR_DISTANCE:
-                next_index = getPoint(i+1, NUM_POINTS*road.num_ctrl_points)
+                next_index = getPoint(i+1, NUMBER_Pt*road.num_ctrl_points)
 
-                getDistance(world, self, sensors, sensorsEquations, v[i], v[next_index])
+                getDistance(map, self, sensors, sensorsEquations, v[i], v[next_index])
                 i = next_index
 
         if CAR_DBG:
-            for k,s in enumerate(sensors):
-                omega = radians(self.rot + 45*k)
-                dx = s * sin(omega)
-                dy = - s * cos(omega)
-                #disegna intersezioni dei sensori
-                if s < SENSOR_DISTANCE:
-                    py.draw.circle(world.win, RED, world.getScreenCoords(self.x+dx, self.y+dy), 6)
+            for w,z in enumerate(sensors):
+                omega = radians(self.rotation + 45*w)
+                dx = z * sin(omega)
+                dy = - z * cos(omega)
+                #draw sensor intersections
+                if z < SENSOR_DISTANCE:
+                    pygame.draw.circle(map.win, RED, map.getScreenCoords(self.x+dx, self.y+dy), 6)
 
         #convert to value between 0 (distance = max) and 1 (distance = 0)
-        for s in range(len(sensors)):
-            sensors[s] = 1 - sensors[s]/SENSOR_DISTANCE
+        for z in range(len(sensors)):
+            sensors[z] = 1 - sensors[z]/SENSOR_DISTANCE
 
         return sensors
     
+    def move(self, road, t):
+        self.ACCELETATION = FRICTION
+        if decode(self.commands, ACCELETATION):
+            self.ACCELETATION = ACCELETATION_STRENGTH
+        if decode(self.commands, BRAKE):
+            self.ACCELETATION = -BRAKE_STREGTH
+        if decode(self.commands, ):
+            self.rotation -= TURN_VELOCITY
+        if decode(self.commands, TURNRIGHT):
+            self.rotation += TURN_VELOCITY
+
+        timeBuffer = 500
+        if MAX_VELOCITY_REDUCTION == 1 or t >= timeBuffer:
+            max_VELOCITY_local = MAX_VELOCITY
+        else:
+            ratio = MAX_VELOCITY_REDUCTION + (1 - MAX_VELOCITY_REDUCTION)*(t/timeBuffer)
+            max_VELOCITY_local = MAX_VELOCITY *ratio
+
+        self.VELOCITY += self.ACCELETATION
+        if self.VELOCITY > max_VELOCITY_local:
+            self.VELOCITY = max_VELOCITY_local
+        if self.VELOCITY < 0:
+            self.VELOCITY = 0
+        self.x=self.x+self.VELOCITY*sin(radians(self.rotation))
+        self.y=self.y-self.VELOCITY*cos(radians(self.rotation)) #origin at top left hence use subtraction
+
+        
+
+        return (self.x, self.y)
+    
+    def draw(self, world):
+        screen_position = world.getScreenCoords(self.x, self.y)
+        rotated_img = pygame.transform.rotate(self.img, -self.rotation)
+        new_rect = rotated_img.get_rect(center = screen_position)
+        world.win.blit(rotated_img, new_rect.topleft)
+
+        if decode(self.commands, BRAKE):
+            rotated_img = pygame.transform.rotate(self.brake_img, -self.rotation)
+            new_rect = rotated_img.get_rect(center = screen_position)
+            world.win.blit(rotated_img, new_rect.topleft)

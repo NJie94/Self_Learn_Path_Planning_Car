@@ -7,10 +7,10 @@ class vect2d:
         self.y = y
         self.angle = angle
     
-    def co(self,x,y):
+    def coordinate(self,x,y):
         self.x = x
         self.y = y
     
-    def getCo(self):
+    def getCoordinate(self):
         return (self.x,self.y)
         
