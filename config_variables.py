@@ -16,7 +16,7 @@ OUTPUT_NEURONS = 4                                      # Neuron Output for cont
 #************************* Car Specification ***************************************
 CAR_DBG = False
 FRICTION = -0.1                                         # Car Friction, The higher the slower
-MAX_VAL = 10                                            # Max Velocity of the Car
+MAX_VEL = 10                                            # Max Velocity of the Car
 MAX_VEL_REDUCTION = 1                                   # Reduce Maximum Velocity during start
 ACC_STRENGTH = 0.2                                      # Acceleration Strength
 BRAKE_STREGTH = 1                                       # Brake Strength
