@@ -1,7 +1,7 @@
 #Create Vector 2d plane class
 import sys
 
-class vect2d:
+class vector2d:
     def __init__(self, x=-1 , y=-1, angle=0):
         self.x = x
         self.y = y
