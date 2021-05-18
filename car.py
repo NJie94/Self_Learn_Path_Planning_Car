@@ -1,10 +1,10 @@
 import sys
 import os
-import pygame as pygame
-import numpy as numpy
+import pygame
+import numpy
 from .config_variables import *
 from math import *
-from random import random
+from random import *
 from .road import *
 from .vector2d import vector2d
 
@@ -84,14 +84,14 @@ class car:
         self.rotation = 0
         self.VELOCITY = MAX_VELOCITY/2
         self.ACCELETATION = 0
-        self.initImgs()
+        self.initImages()
         self.commands = [0,0,0,0]
         
-    def initImgs(self):
-        img_names = ["yellow_car.png", "red_car.png", "blu_car.png", "green_car.png"]
+    def initImages(self):
+        img_names = ["yellow_car.png", "red_car.png", "blue_car.png", "green_car.png"]
         name = img_names[floor(random()*len(img_names))%len(img_names)]                 #Randomly Take one of this image
 
-        self.img = pygame.transform.rotate(pygame.transform.scale(pygame.image.load(os.path.join("imgs", name)).convert_alpha(), (120,69)), -90)
+        self.img = pygame.transform.rotate(pygame.transform.scale(pygame.image.load(os.path.join("images", name)).convert_alpha(), (120,69)), -90)
         self.brake_img = pygame.transform.rotate(pygame.transform.scale(pygame.image.load(os.path.join("imgs", "brakes.png")).convert_alpha(), (120,69)), -90)
         
     #Detect collision of the car with the road model
