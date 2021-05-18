@@ -1,35 +1,35 @@
 import sys
-import pygame as py
+import pygame 
 
 class World:
     
     #Declare initial position
     initPos = (0,0)
-    bestCarPos = (0,0)
+    bestCarPosition = (0,0)
     
     #initialise world map and car model position
     def __init__(self,startPos, world_width,world_height):
         self.initPos = startPos
-        self.bestCarPos = (0,0)
-        self.window = py.display.set_mode(world_width,world_height)
+        self.bestCarPosition = (0,0)
+        self.window = pygame.display.set_mode(world_width,world_height)
         self.window_width = world_width
         self.window_height = world_height
         self.score = 0
         self.bestGenome = None
         
-    def updateBestCarPos(self,pos):
-        self.bestCarPos = pos
+    def BestCarPosUpdate(self,position):
+        self.bestCarPosition = position
     
     def getScreenCoords(self,x,y):
-        return (int(x + self.initPos[0] - self.bestCarPos[0]),
-                (y + self.initPos[1] - self.bestCarPos[1]))
+        return (int(x + self.initPos[0] - self.bestCarPosition[0]),
+                (y + self.initPos[1] - self.bestCarPosition[1]))
         
     def getBestCarPos(self):
-        return self.bestCarPos
+        return self.bestCarPosition
     
-    def updateScore(self,new_Score):
-        self.score = new_Score
+    def updateScoreResult(self,NewScore):
+        self.score = NewScore
     
-    def getScore(self):
+    def getScoreResult(self):
         return self.score
     
