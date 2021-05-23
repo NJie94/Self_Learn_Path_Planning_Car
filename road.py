@@ -40,7 +40,7 @@ class Road:
         for i in range(self.numcontrolpt-2):
             self.createSegment(i+1)
 
-        set = self.numcontrolpt-1
+        self.lastcontrolpt = self.numcontrolpt-1
         self.bottomPTIndex = 0
 
     def calcBorders(self, i):
@@ -65,26 +65,26 @@ class Road:
         p2.co(p1.x + (random()-0.5)*MAX_DEVIATION, p1.y-SPACING)
         p2.angle = MAX_ANGLE*(random()-0.5)
 
-        y_tmp = []
+        y_temporary = []
         for i in range(NUMBER_Pt):
-            y_tmp.append(p2.y+SPACING/NUMBER_Pt*i)
+            y_temporary.append(p2.y+SPACING/NUMBER_Pt*i)
 
         # Get Center Line of the Road
         ny = numpy.array([p2.y, p1.y])                                         # Inverted because scipy increasing the X (in this case the Y)
         nx = numpy.array([p2.x, p1.x])
         cs = interpolate.CubicSpline(ny, nx, axis=0, bc_type=((1,p2.angle),(1,p1.angle)))
-        res = cs(y_tmp)
+        res = cs(y_temporary)
 
         #create the actual borders
         for i in range(NUMBER_Pt):
             self.centerpt[self.next_point].x = res[NUMBER_Pt-i-1]
-            self.centerpt[self.next_point].y = y_tmp[NUMBER_Pt-i-1]
+            self.centerpt[self.next_point].y = y_temporary[NUMBER_Pt-i-1]
             self.calcBorders(self.next_point)
 
             self.next_point = getPoint(self.next_point+1, NUMBER_Pt*self.numcontrolpt)
 
-        set = getPoint(set+1, self.numcontrolpt)
-        sPT = self.next_point
+        self.lastcontrolpt = getPoint(self.lastcontrolpt + 1, self.numcontrolpt)
+        self.bottomPTIndex = self.next_point
 
     def update(self, world):
         if world.getScreenCoords(0, self.controlpt[set].y)[1] > -SAFE_SPACE:

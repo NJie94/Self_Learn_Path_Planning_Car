@@ -2,11 +2,11 @@ import sys
 import os
 import pygame
 import numpy
-from .config_variables import *
+from config_variables import *
 from math import *
 from random import *
-from .road import *
-from .vector2d import vector2d
+from road import Road, getPoint
+from vector2d import vector2d
 
 #******************************************* Function ************************************
 def getSensor(self, world):       #returns the equations of the straight lines(in variable y) of the machine in order [vertical, increasing diagonal, horizontal, decreasing diagonal]
@@ -74,7 +74,7 @@ def decode(commands, type):
     return False
 
 #******************************************** Class *************************************
-class car:
+class Car:
     x, y = 0
     
     def __init__(self,x,y,turn):
